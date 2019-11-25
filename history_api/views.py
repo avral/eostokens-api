@@ -62,17 +62,25 @@ class ChatrsView(APIView):
         time = q.first().time
 
         while True:
+            time += timedelta(days=1)
+
             time_str = time.strftime("%Y-%m-%d")
+
+            # TODO Чето для последнего дня не отображает
+            if time > timezone.now():
+                time -= timedelta(days=1)
+
+                time_str = time.strftime("%Y-%m-%d")
+                chunks[time_str] = q.filter(time__year=time.year,
+                                            time__month=time.month,
+                                            time__day=time.day
+                                            ).values('time', 'price')
+                break
 
             chunks[time_str] = q.filter(time__year=time.year,
                                         time__month=time.month,
                                         time__day=time.day
                                         ).values('time', 'price')
-
-            time += timedelta(days=1)
-
-            if time > timezone.now():
-                break
 
         for time, values in chunks.items():
             if not len(values):
