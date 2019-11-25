@@ -9,7 +9,7 @@ from django.core.cache import cache
 from eospy.cleos import Cleos
 
 from django.db.models import Q
-from eostokens_api.settings import HYPERION_URL, DEX_CONTRACTS
+from eostokens_api.settings import HYPERION_URL, DEX_CONTRACT
 
 from history_api.models import BuyOrder, SellOrder, Market, PriceHistory
 from history_api.utils import get_aware_datetime
@@ -178,16 +178,31 @@ def handle_action(act, contract):
 class Command(BaseCommand):
     help = 'Closes the specified poll for voting'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--resync',
+            action='store_true',
+            help='Delete all data and resync',
+        )
+
     def handle(self, *args, **options):
-        for contract in itertools.cycle(DEX_CONTRACTS.values()):
-            skip = cache.get(f'hyperion_skip_point__{contract}', 0)
-            print(f'scan hyperion_skip_point__{contract} from', skip)
+        if options['resync']:
+            cache.set(f'hyperion_skip_point__{DEX_CONTRACT}', 0)
+            BuyOrder.objects.all().delete()
+            SellOrder.objects.all().delete()
+            Market.objects.all().delete()
+            PriceHistory.objects.all().delete()
+
+        while True:
+            skip = cache.get(f'hyperion_skip_point__{DEX_CONTRACT}', 0)
 
             try:
                 r = requests.get(f'{HYPERION_URL}/history/get_actions',
-                                 {'account': contract,
+                                 {'account': DEX_CONTRACT,
                                   'skip': skip, 'sort': '1',
-                                  'limit': '1000'}).json()
+                                  'limit': '1000'})
+                #print(r.text)
+                r = r.json()
             except Exception as err:
                 print('request hyperion error', err)
                 continue
@@ -199,11 +214,11 @@ class Command(BaseCommand):
 
                 skip += 1
 
-                cache.set(f'hyperion_skip_point__{contract}', skip)
+                cache.set(f'hyperion_skip_point__{DEX_CONTRACT}', skip)
 
                 if act['name'] not in DEX_ACTIONS:
                     continue
 
-                handle_action(act, contract)
+                handle_action(act, DEX_CONTRACT)
 
-            time.sleep(5)
+            time.sleep(30)

@@ -25,7 +25,7 @@ SECRET_KEY = 'e+-hxlg9v-_1hfylnyezb8_r37@!df2t2*ywsij3&68yji)pca'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['eostokens.io']
+ALLOWED_HOSTS = ['eostokens.io', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -77,8 +77,12 @@ WSGI_APPLICATION = 'eostokens_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'eostokens',
+        'USER': 'eostokens',
+        'PASSWORD': 'eostokens',
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': '5432',
     }
 }
 
@@ -131,11 +135,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
-HYPERION_URL = 'http://api.eossweden.org/v2'
+
+#HYPERION_URL = 'http://api.eossweden.org/v2'
+HYPERION_URL = 'https://mainnet.eosn.io/v2'
 EOS_NODE = 'https://api.main.alohaeos.com'
 
-DEX_CONTRACTS = {
- 'EOS': 'eostokensdex',
-}
+DEX_CONTRACT = 'eostokensdex'
 
 CORS_ORIGIN_ALLOW_ALL = True
