@@ -25,7 +25,7 @@ SECRET_KEY = 'e+-hxlg9v-_1hfylnyezb8_r37@!df2t2*ywsij3&68yji)pca'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['eostokens.io']
 
 
 # Application definition

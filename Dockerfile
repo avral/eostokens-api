@@ -7,7 +7,13 @@ COPY . /app
 WORKDIR /app
 
 RUN pip install -r requirements.txt
+RUN pip install gunicorn
 
 EXPOSE 8000
 
-WORKDIR /app/src
+WORKDIR /app
+
+CMD ["gunicorn", "eostokens_api.wsgi", "-b", "0.0.0.0:8000", \
+    "--workers=4", \
+    "--timeout=30", \
+    "--log-level=debug"]
