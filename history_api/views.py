@@ -62,8 +62,6 @@ class ChatrsView(APIView):
         time = q.first().time
 
         while True:
-            time += timedelta(days=1)
-
             time_str = time.strftime("%Y-%m-%d")
 
             # TODO Чето для последнего дня не отображает
@@ -82,8 +80,11 @@ class ChatrsView(APIView):
                                         time__day=time.day
                                         ).values('time', 'price')
 
+            time += timedelta(days=1)
+
         for time, values in chunks.items():
             if not len(values):
+                # FIXME Здесь падает для TKT
                 last_item = result[-1]
 
                 result.append({
